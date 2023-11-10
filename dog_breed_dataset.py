@@ -4,15 +4,21 @@ import os
 import numpy as np
 from torch.utils.data import Dataset
 from torchvision.io import read_image
+import torch
+from sklearn.preprocessing import LabelEncoder
 
 class DogBreedDataset(Dataset):
-    def __init__(self, label_file, img_folder, transform=None, target_transform=None):
+    def __init__(self, label_file, img_folder, transform=None, target_transform=None, mode="train"):
         self.num_breeds = 120
         self.img_folder = img_folder
         self.transform = transform
         self.target_transform = target_transform
         self.labels = pd.read_csv(label_file)
         self.label_file_name = label_file
+        self.mode = mode
+        self.label_encoder = LabelEncoder
+
+    
 
     def __len__(self):
         return len(self.labels)
@@ -22,7 +28,9 @@ class DogBreedDataset(Dataset):
         # image = Image.open(img_path)
         image = read_image(img_path)
         image = image.permute(1, 2, 0)
-        label = self.labels.iloc[idx, 0]
+        label = self.labels.iloc[idx, 3]
+
+        print("LABEL: ", label, type(label))
         print(image.shape)
         if self.transform:
             image = self.transform(image=np.array(image))
@@ -30,3 +38,4 @@ class DogBreedDataset(Dataset):
             label = self.target_transform(label)
         print(image.shape)
         return image, label
+        

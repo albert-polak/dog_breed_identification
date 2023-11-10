@@ -25,6 +25,10 @@ transform = A.Compose([
 ])
 
 use_gpu = torch.cuda.is_available()
+print("CUDA GPU: ", use_gpu)
+
+os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+# os.environ["TORCH_USE_CUDA_DSA"] = "1"
 
 class ResNetModel(L.LightningModule):
     def __init__(self, lr=1e-3, batch_size=16):
@@ -110,8 +114,8 @@ def train():
         save_last=True,
     )
     trainer_args = {
-        "accelerator": "gpu",
-        "devices": [0],
+        # "accelerator": "gpu",
+        # "devices": [0],
         "max_epochs": 10,
         "callbacks": [checkpoint_callback],
         "precision": 32,
