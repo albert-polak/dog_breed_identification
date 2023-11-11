@@ -10,6 +10,8 @@ from torchvision import models
 from dog_breed_dataset import DogBreedDataset
 
 import albumentations as A
+from albumentations.pytorch import ToTensorV2
+from albumentations.augmentations.transforms import Normalize
 
 from torchmetrics import Accuracy  
 
@@ -18,16 +20,28 @@ from lightning.pytorch.callbacks import Callback
 
 from torch.optim import Adam
 
-transform = A.Compose([
-    A.RandomCrop(width=256, height=256),
+transform_a = A.Compose([
+    A.RandomResizedCrop(width=224, height=224),
     A.HorizontalFlip(p=0.5),
     A.RandomBrightnessContrast(p=0.2),
+    Normalize(),
+    ToTensorV2()
+
 ])
+transform_val = A.Compose([
+    A.Resize(224,224),
+    # A.RandomResizedCrop(width=224, height=224),
+    # A.HorizontalFlip(p=0.5),
+    # A.RandomBrightnessContrast(p=0.2),
+    Normalize(),
+    ToTensorV2()
+])
+
 
 use_gpu = torch.cuda.is_available()
 print("CUDA GPU: ", use_gpu)
 
-os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+# os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 # os.environ["TORCH_USE_CUDA_DSA"] = "1"
 
 class ResNetModel(L.LightningModule):
@@ -55,7 +69,8 @@ class ResNetModel(L.LightningModule):
 
 
     def forward(self, X):
-        X = X.permute(0, 3, 1, 2)
+        # X = X['image']
+        # X = X.permute(0, 3, 1, 2)
         X = X.to(torch.float32).cuda()
         return self.model(X)
 
@@ -116,16 +131,16 @@ def train():
     trainer_args = {
         # "accelerator": "gpu",
         # "devices": [0],
-        "max_epochs": 10,
+        "max_epochs": 25,
         "callbacks": [checkpoint_callback],
         "precision": 32,
     }
 
-    train_dog_dataset = DogBreedDataset('./train.csv', './dog-breed-identification/imgs/')
-    train_loader = DataLoader(train_dog_dataset)
+    train_dog_dataset = DogBreedDataset('./train.csv', './dog-breed-identification/imgs/', transform=transform_a)
+    train_loader = DataLoader(train_dog_dataset, batch_size=16)
 
-    val_dog_dataset = DogBreedDataset('./val.csv', './dog-breed-identification/imgs/')
-    val_loader = DataLoader(val_dog_dataset)
+    val_dog_dataset = DogBreedDataset('./val.csv', './dog-breed-identification/imgs/', transform=transform_val)
+    val_loader = DataLoader(val_dog_dataset, batch_size=16)
 
     trainer = L.Trainer(**trainer_args)
     trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=val_loader)

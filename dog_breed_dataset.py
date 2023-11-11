@@ -7,6 +7,7 @@ from torchvision.io import read_image
 import torch
 from sklearn.preprocessing import LabelEncoder
 
+
 class DogBreedDataset(Dataset):
     def __init__(self, label_file, img_folder, transform=None, target_transform=None, mode="train"):
         self.num_breeds = 120
@@ -30,12 +31,12 @@ class DogBreedDataset(Dataset):
         image = image.permute(1, 2, 0)
         label = self.labels.iloc[idx, 3]
 
-        print("LABEL: ", label, type(label))
-        print(image.shape)
+        # print("LABEL: ", label, type(label))
+        # print(image.shape)
         if self.transform:
-            image = self.transform(image=np.array(image))
+            image = self.transform(image=np.array(image))['image']
         if self.target_transform:
             label = self.target_transform(label)
-        print(image.shape)
+        # print(image.shape)
         return image, label
         
