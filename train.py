@@ -144,10 +144,9 @@ def train():
 
     trainer = L.Trainer(**trainer_args)
     trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    print('XDD')
     torch.save(trainer.model.model.state_dict(), save_path + "./trained_model.pt")
 
-train()
+# train()
 # labels = pd.read_csv('./train.csv')
 # # img_path = os.path.join("./dog-breed-identification/", labels.iloc[0, 0])
 # print(labels.iloc[0, 1])
