@@ -144,7 +144,6 @@ def train():
 
     trainer = L.Trainer(**trainer_args)
     trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    torch.save(trainer.model.model.state_dict(), save_path + "./trained_model.pt")
 
 # train()
 # labels = pd.read_csv('./train.csv')
