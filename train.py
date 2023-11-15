@@ -23,18 +23,16 @@ from torch.optim import Adam
 transform_a = A.Compose([
     A.RandomResizedCrop(width=224, height=224),
     A.HorizontalFlip(p=0.5),
-    A.RandomBrightnessContrast(p=0.2),
-    Normalize(),
-    ToTensorV2()
+    # A.RandomBrightnessContrast(p=0.2),
+    ToTensorV2(),
+    Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 
 ])
 transform_val = A.Compose([
     A.Resize(224,224),
-    # A.RandomResizedCrop(width=224, height=224),
-    # A.HorizontalFlip(p=0.5),
-    # A.RandomBrightnessContrast(p=0.2),
-    Normalize(),
-    ToTensorV2()
+
+    ToTensorV2(),
+    Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
 
@@ -87,7 +85,9 @@ class ResNetModel(L.LightningModule):
         # if not torch.is_tensor(y):
         #     y = torch.tensor(y)
         loss = self.loss_fn(preds, y)
-        acc = self.acc(preds, y)
+        # acc = self.acc(preds, y)
+        acc_preds = torch.argmax(preds, dim=1)
+        acc = self.acc(acc_preds, y)
         return loss, acc
     
     def training_step(self, batch, batch_idx):
@@ -124,7 +124,6 @@ def train():
         dirpath=save_path,
         filename="resnet-model-{epoch}-{val_loss:.2f}-{val_acc:0.2f}",
         monitor="val_loss",
-        save_top_k=3,
         mode="min",
         save_last=True,
     )

@@ -31,7 +31,6 @@ def train_from_checkpoint():
     checkpoint_callback = ModelCheckpoint(dirpath='./models/', 
         filename="resnet-model-{epoch}-{val_loss:.2f}-{val_acc:0.2f}",
         monitor="val_loss",
-        save_top_k=3,
         save_last=True,)
 
     trainer = L.Trainer(callbacks=[checkpoint_callback])
