@@ -8,6 +8,7 @@ from torchvision import models
 from dog_breed_dataset import DogBreedDataset
 
 import lightning as L
+from lightning.pytorch.callbacks import ModelCheckpoint
 
 # from train import ResNetModel
 import train
@@ -27,8 +28,13 @@ def train_from_checkpoint():
     # checkpoint_path=ckpt_path,
     # map_location=None,
     # )
+    checkpoint_callback = ModelCheckpoint(dirpath='./models/', 
+        filename="resnet-model-{epoch}-{val_loss:.2f}-{val_acc:0.2f}",
+        monitor="val_loss",
+        save_top_k=3,
+        save_last=True,)
 
-    trainer = L.Trainer()
+    trainer = L.Trainer(callbacks=[checkpoint_callback])
     print("COSSSSOKADOSKDPAKSOPKD")
     train_dog_dataset = DogBreedDataset('./train.csv', './dog-breed-identification/imgs/', transform=train.transform_a)
     train_loader = DataLoader(train_dog_dataset, batch_size=16)
