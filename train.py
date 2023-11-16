@@ -9,29 +9,27 @@ import pandas as pd
 from torchvision import models
 from dog_breed_dataset import DogBreedDataset
 
-import albumentations as A
+
 from torchvision import transforms
 
 from torchmetrics import Accuracy  
 
 import lightning as L
-from lightning.pytorch.callbacks import Callback
 
 from torch.optim import Adam
 
 transform_a = transforms.Compose([
     transforms.RandomResizedCrop(size=(224, 224)),
     transforms.RandomHorizontalFlip(p=0.5),
-    # A.RandomBrightnessContrast(p=0.2),
     transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         
 ])
-transform_val = A.Compose([
+transform_val = transforms.Compose([
     transforms.Resize(224),
     transforms.CenterCrop(224),
     transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     
 ])
 
@@ -144,7 +142,7 @@ def train():
     trainer = L.Trainer(**trainer_args)
     trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 
-# train()
+train()
 # labels = pd.read_csv('./train.csv')
 # # img_path = os.path.join("./dog-breed-identification/", labels.iloc[0, 0])
 # print(labels.iloc[0, 1])

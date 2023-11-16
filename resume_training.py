@@ -12,9 +12,6 @@ from lightning.pytorch.callbacks import ModelCheckpoint
 
 # from train import ResNetModel
 import train
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
-from albumentations.augmentations.transforms import Normalize
 
 use_gpu = torch.cuda.is_available()
 # print("CUDA GPU: ", use_gpu)

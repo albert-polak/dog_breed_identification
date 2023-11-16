@@ -10,7 +10,7 @@ from dog_breed_dataset import DogBreedDataset
 import lightning as L
 
 from train import ResNetModel
-import albumentations as A
+
 from torchvision import transforms
 
 test_transform = transforms.Compose([
