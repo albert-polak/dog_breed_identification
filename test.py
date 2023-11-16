@@ -11,12 +11,12 @@ import lightning as L
 
 from train import ResNetModel
 import albumentations as A
-from albumentations.pytorch import ToTensorV2
-from albumentations.augmentations.transforms import Normalize
+from torchvision import transforms
 
-test_transform = A.Compose([
-    Normalize(),
-    ToTensorV2()
+test_transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(),
+    
 ])
 
 use_gpu = torch.cuda.is_available()

@@ -10,8 +10,7 @@ from torchvision import models
 from dog_breed_dataset import DogBreedDataset
 
 import albumentations as A
-from albumentations.pytorch import ToTensorV2
-from albumentations.augmentations.transforms import Normalize
+from torchvision import transforms
 
 from torchmetrics import Accuracy  
 
@@ -20,17 +19,20 @@ from lightning.pytorch.callbacks import Callback
 
 from torch.optim import Adam
 
-transform_a = A.Compose([
-    A.RandomResizedCrop(width=224, height=224),
-    A.HorizontalFlip(p=0.5),
+transform_a = transforms.Compose([
+    transforms.RandomResizedCrop(size=(224, 224)),
+    transforms.RandomHorizontalFlip(p=0.5),
     # A.RandomBrightnessContrast(p=0.2),
-    Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-    ToTensorV2()    
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        
 ])
 transform_val = A.Compose([
-    A.Resize(224,224),
-    Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-    ToTensorV2()
+    transforms.Resize(224),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+    
 ])
 
 
