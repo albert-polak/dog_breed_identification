@@ -27,15 +27,11 @@ transform_a = transforms.Compose([
     transforms.RandomResizedCrop(size=(224, 224)),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        
 ])
 transform_val = transforms.Compose([
     transforms.Resize(224),
     transforms.CenterCrop(224),
     transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    
 ])
 
 
@@ -216,8 +212,8 @@ def train():
     for i in range(len(final_features_val)):
         val_dataset.append([final_features_val[i], labels_val[i]])
 
-    trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True)
-    valloader = torch.utils.data.DataLoader(val_dataset, batch_size=128, shuffle=True)
+    trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
+    valloader = torch.utils.data.DataLoader(val_dataset, batch_size=64, shuffle=True)
 
     model = ResNetModel(input_shape=final_features.shape[1:])
 
