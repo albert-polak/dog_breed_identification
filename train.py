@@ -168,8 +168,9 @@ def train():
         save_last=True,
     )
     trainer_args = {
-        # "accelerator": "gpu",
-        # "devices": [0],
+        "accelerator": "gpu",
+        "devices": "auto",
+        "strategy": "auto",
         "max_epochs": 25,
         "callbacks": [checkpoint_callback],
         "precision": 32,
