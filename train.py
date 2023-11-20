@@ -19,6 +19,7 @@ from torchvision import transforms
 from torchmetrics import Accuracy  
 
 import lightning as L
+from lightning.pytorch.tuner import Tuner
 
 from torch.optim import Adam
 
@@ -117,7 +118,7 @@ class ResNetModel(L.LightningModule):
         return self.model(X)
 
     def configure_optimizers(self):
-        scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=30, gamma=0.95)
+        scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=30, gamma=0.90)
         return {"optimizer": self.optimizer, "lr_scheduler": scheduler}
 
     def _step(self, batch):
@@ -170,7 +171,7 @@ def train():
         "accelerator": "gpu",
         "devices": "auto",
         "strategy": "auto",
-        "max_epochs": 25,
+        "max_epochs": 1000,
         "callbacks": [checkpoint_callback],
         "precision": 32,
     }
@@ -215,13 +216,19 @@ def train():
     for i in range(len(final_features_val)):
         val_dataset.append([final_features_val[i], labels_val[i]])
 
-    trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=32)
-    valloader = torch.utils.data.DataLoader(val_dataset, batch_size=32)
+    trainloader = torch.utils.data.DataLoader(train_dataset, shuffle=True)
+    valloader = torch.utils.data.DataLoader(val_dataset, shuffle=True)
 
     model = ResNetModel(input_shape=final_features.shape[1:])
 
 
     trainer = L.Trainer(**trainer_args)
+
+    tuner = Tuner(trainer)
+
+    tuner.lr_find(model)
+    tuner.scale_batch_size(model, mode="power")
+
     trainer.fit(model=model, train_dataloaders=trainloader, val_dataloaders=valloader)
 
 train()
