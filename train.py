@@ -105,7 +105,7 @@ class ResNetModel(L.LightningModule):
             task="binary" if self.num_classes == 1 else "multiclass", num_classes=self.num_classes
         )
 
-        self.optimizer = Adam
+        self.optimizer = Adam(self.parameters(), lr=self.lr)
 
         # self.model.fc = nn.Linear(self.model.fc.in_features, self.num_classes)
 
@@ -117,7 +117,7 @@ class ResNetModel(L.LightningModule):
         return self.model(X)
 
     def configure_optimizers(self):
-        scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
+        scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=30, gamma=0.95)
         return {"optimizer": self.optimizer, "lr_scheduler": scheduler}
 
     def _step(self, batch):
