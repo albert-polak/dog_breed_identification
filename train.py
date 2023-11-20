@@ -216,18 +216,13 @@ def train():
     for i in range(len(final_features_val)):
         val_dataset.append([final_features_val[i], labels_val[i]])
 
-    trainloader = torch.utils.data.DataLoader(train_dataset, shuffle=True)
-    valloader = torch.utils.data.DataLoader(val_dataset, shuffle=True)
+    trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True)
+    valloader = torch.utils.data.DataLoader(val_dataset, batch_size=128, shuffle=True)
 
     model = ResNetModel(input_shape=final_features.shape[1:])
 
 
     trainer = L.Trainer(**trainer_args)
-
-    tuner = Tuner(trainer)
-
-    tuner.lr_find(model)
-    tuner.scale_batch_size(model, mode="power")
 
     trainer.fit(model=model, train_dataloaders=trainloader, val_dataloaders=valloader)
 
