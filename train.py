@@ -66,6 +66,7 @@ def get_features(model_name, data_loader, weights):
     # Extract features
     model.eval()
   
+    labels = []
     feature_maps = []
     with torch.no_grad():
         for inputs in data_loader:
@@ -77,10 +78,11 @@ def get_features(model_name, data_loader, weights):
             features = outputs.view(outputs.size(0), outputs.size(1), -1).mean(dim=2)
             # print(features.shape)
             feature_maps.append(features)
+            labels.append(inputs[1])
 
-    feature_maps = torch.cat(feature_maps, dim=0).numpy()
+    feature_maps = torch.cat(feature_maps, dim=0).to("cpu").numpy()
     print('Feature maps shape: ', feature_maps.shape)
-    return feature_maps, inputs[1]
+    return feature_maps, labels
 
 class ResNetModel(L.LightningModule):
     def __init__(self, lr=1e-3, batch_size=32, input_shape=10):
