@@ -81,6 +81,7 @@ def get_features(model_name, data_loader, weights):
             labels.append(inputs[1])
 
     feature_maps = torch.cat(feature_maps, dim=0).to("cpu").numpy()
+    labels = torch.cat(labels, dim=0).to("cpu").numpy()
     print('Feature maps shape: ', feature_maps.shape)
     return feature_maps, labels
 
@@ -93,15 +94,13 @@ class ResNetModel(L.LightningModule):
         self.num_classes = 120
         
         self.model = nn.Sequential(nn.Dropout(0.7),
-                                   nn.Linear(input_shape[0], self.num_classes),
-                                   nn.Softmax(dim=1))
+                                   nn.Linear(input_shape[0], self.num_classes))
 
         self.lr = lr
         self.batch_size = batch_size
         
-        self.loss_fn = (
-            nn.BCEWithLogitsLoss() if self.num_classes == 1 else nn.CrossEntropyLoss()
-        )
+        self.loss_fn = nn.CrossEntropyLoss()
+        
         self.acc = Accuracy(
             task="binary" if self.num_classes == 1 else "multiclass", num_classes=self.num_classes
         )
@@ -118,17 +117,13 @@ class ResNetModel(L.LightningModule):
         return self.model(X)
 
     def configure_optimizers(self):
-        return self.optimizer(self.parameters(), lr=self.lr)
+        scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
+        return {"optimizer": self.optimizer, "lr_scheduler": scheduler}
 
     def _step(self, batch):
         x, y = batch
         preds = self(x)
 
-        if self.num_classes == 1:
-            preds = preds.flatten()
-            y = y.float()
-        # if not torch.is_tensor(y):
-        #     y = torch.tensor(y)
         loss = self.loss_fn(preds, y)
         # acc = self.acc(preds, y)
         acc_preds = torch.argmax(preds, dim=1)
