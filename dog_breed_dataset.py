@@ -33,7 +33,7 @@ class DogBreedDataset(Dataset):
             # image = image.permute(1, 2, 0)
         else:
             image = self.features[idx]
-            print(self.features[0])
+            # print(self.features[0])
 
         label = self.labels.iloc[idx, 3]
 

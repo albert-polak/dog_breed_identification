@@ -60,6 +60,8 @@ def get_features(model_name, data_loader, weights):
     model = models_dict[model_name](weights=weights)
     # model = nn.Sequential(*list(model.children())[:-1])  # Remove the fully connected layer
     model.fc = nn.Sequential()
+    device = torch.device("cuda")
+    model=model.to(device)
 
     # Extract features
     model.eval()
@@ -69,8 +71,8 @@ def get_features(model_name, data_loader, weights):
         for inputs in data_loader:
             # print(len(inputs[0]))
             inputs_transformed = data_transform(inputs[0])
-            print(inputs_transformed.shape)
-            outputs = model(inputs_transformed)
+            # print(inputs_transformed.shape)
+            outputs = model(inputs_transformed.to(device))
             # print(outputs.shape)
             features = outputs.view(outputs.size(0), outputs.size(1), -1).mean(dim=2)
             # print(features.shape)
@@ -78,7 +80,7 @@ def get_features(model_name, data_loader, weights):
 
     feature_maps = torch.cat(feature_maps, dim=0).numpy()
     print('Feature maps shape: ', feature_maps.shape)
-    return feature_maps
+    return feature_maps, inputs[1]
 
 class ResNetModel(L.LightningModule):
     def __init__(self, lr=1e-3, batch_size=32, input_shape=10):
@@ -89,7 +91,7 @@ class ResNetModel(L.LightningModule):
         self.num_classes = 120
         
         self.model = nn.Sequential(nn.Dropout(0.7),
-                                   nn.Linear(input_shape, self.num_classes),
+                                   nn.Linear(input_shape[0], self.num_classes),
                                    nn.Softmax(dim=1))
 
         self.lr = lr
@@ -104,7 +106,7 @@ class ResNetModel(L.LightningModule):
 
         self.optimizer = Adam
 
-        self.model.fc = nn.Linear(self.model.fc.in_features, self.num_classes)
+        # self.model.fc = nn.Linear(self.model.fc.in_features, self.num_classes)
 
 
     def forward(self, X):
@@ -184,13 +186,13 @@ def train():
                                       transform=transform_val)
     val_loader = DataLoader(val_dog_dataset, batch_size=32, shuffle=False)
 
-    inceptionv3_features = get_features("inception_v3", train_loader, Inception_V3_Weights.IMAGENET1K_V1)
-    densenet_features = get_features("densenet121", train_loader, DenseNet121_Weights.IMAGENET1K_V1)
-    resnext_features = get_features("resnext50_32x4d", train_loader, ResNeXt50_32X4D_Weights.IMAGENET1K_V2)
+    inceptionv3_features, labels = get_features("inception_v3", train_loader, Inception_V3_Weights.IMAGENET1K_V1)
+    densenet_features, _ = get_features("densenet121", train_loader, DenseNet121_Weights.IMAGENET1K_V1)
+    resnext_features, _ = get_features("resnext50_32x4d", train_loader, ResNeXt50_32X4D_Weights.IMAGENET1K_V2)
 
-    inceptionv3_features_val = get_features("inception_v3", val_loader, Inception_V3_Weights.IMAGENET1K_V1)
-    densenet_features_val = get_features("densenet121", val_loader, DenseNet121_Weights.IMAGENET1K_V1)
-    resnext_features_val = get_features("resnext50_32x4d", val_loader, ResNeXt50_32X4D_Weights.IMAGENET1K_V2)
+    inceptionv3_features_val, labels_val = get_features("inception_v3", val_loader, Inception_V3_Weights.IMAGENET1K_V1)
+    densenet_features_val, _ = get_features("densenet121", val_loader, DenseNet121_Weights.IMAGENET1K_V1)
+    resnext_features_val, _ = get_features("resnext50_32x4d", val_loader, ResNeXt50_32X4D_Weights.IMAGENET1K_V2)
 
     final_features = np.concatenate([inceptionv3_features,
                                  densenet_features,
@@ -201,19 +203,29 @@ def train():
                                  densenet_features_val,
                                  resnext_features_val,], axis=-1)
     
-    train_dog_dataset = DogBreedDataset('./train.csv', './dog-breed-identification/imgs/', 
-                                        mode="feature", features=final_features)
-    train_loader = DataLoader(train_dog_dataset, batch_size=32, shuffle=False)
+    # train_dog_dataset = DogBreedDataset('./train.csv', './dog-breed-identification/imgs/', 
+    #                                     mode="feature", features=final_features)
+    # train_loader = DataLoader(train_dog_dataset, batch_size=32, shuffle=False)
 
-    val_dog_dataset = DogBreedDataset('./val.csv', './dog-breed-identification/imgs/', 
-                                        mode="feature", features=final_features_val)
-    val_loader = DataLoader(val_dog_dataset, batch_size=32, shuffle=False)
+    # val_dog_dataset = DogBreedDataset('./val.csv', './dog-breed-identification/imgs/', 
+    #                                     mode="feature", features=final_features_val)
+    # val_loader = DataLoader(val_dog_dataset, batch_size=32, shuffle=False)
+    train_dataset = []
+    for i in range(len(final_features)):
+        train_dataset.append([final_features[i], labels[i]])
+
+    val_dataset = []
+    for i in range(len(final_features_val)):
+        val_dataset.append([final_features_val[i], labels_val[i]])
+
+    trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=32)
+    valloader = torch.utils.data.DataLoader(val_dataset, batch_size=32)
 
     model = ResNetModel(input_shape=final_features.shape[1:])
 
 
     trainer = L.Trainer(**trainer_args)
-    trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=val_loader)
+    trainer.fit(model=model, train_dataloaders=trainloader, val_dataloaders=valloader)
 
 train()
 # labels = pd.read_csv('./train.csv')
