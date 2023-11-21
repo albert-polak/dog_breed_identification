@@ -83,7 +83,7 @@ def get_features(model_name, data_loader, weights):
     return feature_maps, labels
 
 class ResNetModel(L.LightningModule):
-    def __init__(self, lr=1e-3, batch_size=32, input_shape=10):
+    def __init__(self, lr=1e-3, batch_size=32, input_shape=[5096]):
         super().__init__()
         # init a pretrained resnet
         # self.model = models.resnet18(pretrained=True)
@@ -212,8 +212,8 @@ def train():
     for i in range(len(final_features_val)):
         val_dataset.append([final_features_val[i], labels_val[i]])
 
-    trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
-    valloader = torch.utils.data.DataLoader(val_dataset, batch_size=64, shuffle=True)
+    trainloader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    valloader = DataLoader(val_dataset, batch_size=64, shuffle=True)
 
     model = ResNetModel(input_shape=final_features.shape[1:])
 
@@ -222,7 +222,7 @@ def train():
 
     trainer.fit(model=model, train_dataloaders=trainloader, val_dataloaders=valloader)
 
-train()
+# train()
 # labels = pd.read_csv('./train.csv')
 # # img_path = os.path.join("./dog-breed-identification/", labels.iloc[0, 0])
 # print(labels.iloc[0, 1])
