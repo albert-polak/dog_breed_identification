@@ -46,5 +46,5 @@ class DogBreedDataset(Dataset):
         if self.target_transform:
             label = self.target_transform(label)
         # print(image.shape)
-        return image, label
+        return image, label, img_path
         

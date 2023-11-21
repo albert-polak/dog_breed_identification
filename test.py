@@ -58,4 +58,5 @@ def test():
     feature_loader = DataLoader(feature_data, batch_size=32)
     trainer.test(model=model, dataloaders=feature_loader)
 
-test()
+if __name__ == "__main__":
+    test()
