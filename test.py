@@ -10,7 +10,7 @@ from dog_breed_dataset import DogBreedDataset
 
 import lightning as L
 
-from train import ResNetModel, get_features
+from train import DogBreedModel, get_features
 
 from torchvision.models import __dict__ as models_dict
 from torchvision.models import Inception_V3_Weights
@@ -29,7 +29,7 @@ use_gpu = torch.cuda.is_available()
 # print("CUDA GPU: ", use_gpu)
 
 def test():
-    model = ResNetModel
+    model = DogBreedModel
 
     ckpt_path = './models/models/resnet-model-epoch=5-val_loss=0.32-val_acc=0.90.ckpt'
 

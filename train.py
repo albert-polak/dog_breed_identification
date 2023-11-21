@@ -82,7 +82,7 @@ def get_features(model_name, data_loader, weights):
     print('Feature maps shape: ', feature_maps.shape)
     return feature_maps, labels
 
-class ResNetModel(L.LightningModule):
+class DogBreedModel(L.LightningModule):
     def __init__(self, lr=1e-3, batch_size=32, input_shape=[5096]):
         super().__init__()
         # init a pretrained resnet
@@ -215,7 +215,7 @@ def train():
     trainloader = DataLoader(train_dataset, batch_size=64, shuffle=True)
     valloader = DataLoader(val_dataset, batch_size=64, shuffle=True)
 
-    model = ResNetModel(input_shape=final_features.shape[1:])
+    model = DogBreedModel(input_shape=final_features.shape[1:])
 
 
     trainer = L.Trainer(**trainer_args)

@@ -10,14 +10,14 @@ from dog_breed_dataset import DogBreedDataset
 import lightning as L
 from lightning.pytorch.callbacks import ModelCheckpoint
 
-# from train import ResNetModel
+# from train import DogBreedModel
 import train
 
 use_gpu = torch.cuda.is_available()
 # print("CUDA GPU: ", use_gpu)
 
 def train_from_checkpoint():
-    model = train.ResNetModel()
+    model = train.DogBreedModel()
 
     ckpt_path = './models/models/last.ckpt'
 
@@ -31,7 +31,6 @@ def train_from_checkpoint():
         save_last=True,)
 
     trainer = L.Trainer(callbacks=[checkpoint_callback])
-    print("COSSSSOKADOSKDPAKSOPKD")
     train_dog_dataset = DogBreedDataset('./train.csv', './dog-breed-identification/imgs/', transform=train.transform_a)
     train_loader = DataLoader(train_dog_dataset, batch_size=16)
 
